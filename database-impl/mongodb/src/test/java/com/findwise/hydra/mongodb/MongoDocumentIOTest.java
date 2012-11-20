@@ -86,13 +86,19 @@ public class MongoDocumentIOTest {
 		random = new MongoDocument();
 		
 		mdc.getDocumentWriter().deleteAll();
-		
-		mdc.getDocumentWriter().insert(test);
-		mdc.getDocumentWriter().insert(test2);
-		mdc.getDocumentWriter().insert(random);
-		
-		DocumentFile df = new DocumentFile(test.getID(), f.getName(), new FileInputStream(f), "setup");
-		mdc.getDocumentWriter().write(df);	
+	}
+	
+	private void insertTestDocs() {
+		try {
+			mdc.getDocumentWriter().insert(test);
+			mdc.getDocumentWriter().insert(test2);
+			mdc.getDocumentWriter().insert(random);
+			
+			DocumentFile df = new DocumentFile(test.getID(), f.getName(), new FileInputStream(f), "setup");
+			mdc.getDocumentWriter().write(df);	
+		} catch(Exception e) {
+			throw new RuntimeException("Failed during insert of test documents", e);
+		}
 	}
 	
 	@AfterClass
@@ -137,6 +143,7 @@ public class MongoDocumentIOTest {
 
 	@Test
 	public void testUpdateDocument() {
+		insertTestDocs();
 		String field = "xyz";
 		String content = "zyx";
 		MongoQuery mdq = new MongoQuery();
@@ -155,6 +162,7 @@ public class MongoDocumentIOTest {
 
 	@Test
 	public void testGetDocuments() {
+		insertTestDocs();
 		MongoQuery mdq = new MongoQuery();
 		List<DatabaseDocument<MongoType>> list = mdc.getDocumentReader().getDocuments(mdq, 3);
 		if(list.size()!=3) {
@@ -218,7 +226,9 @@ public class MongoDocumentIOTest {
 	}
 
 	@Test
-	public void testGetDocumentFile() throws IOException{
+	public void testGetDocumentFile() throws IOException {
+		insertTestDocs();
+		
 		DocumentFile fx = mdc.getDocumentReader().getDocumentFile(test, f.getName());
 
 		if(!f.getName().equals(fx.getFileName())) {
@@ -241,6 +251,8 @@ public class MongoDocumentIOTest {
 	
 	@Test
 	public void testGetDocumentDatabaseQuery() {
+		insertTestDocs();
+		
 		DatabaseQuery<MongoType> dbq = new MongoQuery();
 		dbq.requireContentFieldEquals("name", "test");
 		dbq.requireContentFieldEquals("number", 2);
@@ -254,6 +266,8 @@ public class MongoDocumentIOTest {
 
 	@Test
 	public void testGetAndTagDocumentDatabaseQueryString() {
+		insertTestDocs();
+		
 		MongoQuery mdq = new MongoQuery();
 		mdq.requireContentFieldExists("name");
 		Document d = mdc.getDocumentWriter().getAndTag(mdq, "tag");
@@ -280,6 +294,8 @@ public class MongoDocumentIOTest {
 
 	@Test
 	public void testDelete() {
+		insertTestDocs();
+		
 		MongoQuery query = new MongoQuery();
 		query.requireContentFieldNotEquals("name", "test");
 		MongoDocument d = (MongoDocument) mdc.getDocumentReader().getDocument(query);
@@ -293,6 +309,7 @@ public class MongoDocumentIOTest {
 	
 	@Test
 	public void testDiscardDocument() {		
+		insertTestDocs();
 		DatabaseDocument<MongoType> discarded_d = mdc.getDocumentWriter().getAndTag(new MongoQuery(), "DiscardedTag");
 		
 		DatabaseDocument<MongoType> d;
@@ -323,7 +340,8 @@ public class MongoDocumentIOTest {
 	}
 	
 	@Test
-	public void testFailedDocument() {		
+	public void testFailedDocument() {	
+		insertTestDocs();
 		DatabaseDocument<MongoType> failed = mdc.getDocumentWriter().getAndTag(new MongoQuery(), "failedTag");
 		
 		mdc.getDocumentWriter().markFailed(failed, "test_stage");
@@ -343,7 +361,8 @@ public class MongoDocumentIOTest {
 	}
 	
 	@Test
-	public void testPendingDocument() {		
+	public void testPendingDocument() {
+		insertTestDocs();
 		DatabaseDocument<MongoType> pending = mdc.getDocumentWriter().getAndTag(new MongoQuery(), "pending");
 		
 		mdc.getDocumentWriter().markPending(pending, "test_stage");
@@ -356,7 +375,8 @@ public class MongoDocumentIOTest {
 	}
 	
 	@Test
-	public void testProcessedDocument() {		
+	public void testProcessedDocument() {
+		insertTestDocs();	
 		DatabaseDocument<MongoType> processed = mdc.getDocumentWriter().getAndTag(new MongoQuery(), "processed");
 		
 		mdc.getDocumentWriter().markProcessed(processed, "test_stage");
@@ -370,6 +390,7 @@ public class MongoDocumentIOTest {
 	
 	@Test
 	public void testActiveDatabaseSize() {
+		insertTestDocs();
 		if(mdc.getDocumentReader().getActiveDatabaseSize() != 3) {
 			fail("Not the correct active database size. Expected 3 got: "+mdc.getDocumentReader().getActiveDatabaseSize());
 		}
