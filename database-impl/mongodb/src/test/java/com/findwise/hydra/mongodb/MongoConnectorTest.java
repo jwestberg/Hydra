@@ -10,18 +10,30 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.findwise.hydra.DatabaseConfiguration;
 import com.findwise.hydra.DatabaseConnector.ConversionException;
+import com.findwise.hydra.DatabaseConnectorTest;
 import com.findwise.hydra.TestModule;
 import com.findwise.hydra.local.LocalDocument;
 import com.google.inject.Guice;
 import com.mongodb.Mongo;
 
-public class MongoConnectorTest {
-	MongoConnector mdc;
-	
+public class MongoConnectorTest extends DatabaseConnectorTest<MongoType> {
+	private MongoConnector mdc;
+
 	@Before
-	public void setUp() throws Exception {
-		mdc = Guice.createInjector(new TestModule("junit-MongoConnectorTest")).getInstance(MongoConnector.class);
+	public void setUp() {
+		mdc = getNewConnector();
+	}
+	
+	@Override
+	protected MongoConnector getNewConnector() {
+		return Guice.createInjector(new TestModule("junit-MongoConnectorTest")).getInstance(MongoConnector.class);
+	}
+
+	@Override
+	protected MongoConnector getNewConnector(DatabaseConfiguration conf) {
+		return Guice.createInjector(new TestModule("junit-MongoConnectorTest", conf)).getInstance(MongoConnector.class);
 	}
 	
 	@AfterClass

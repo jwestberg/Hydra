@@ -227,9 +227,8 @@ public class MongoConnector implements DatabaseConnector<MongoType> {
 	public MongoStatusIO getStatusReader() {
 		return statusIO;
 	}
-
-	@Override
-	public DatabaseDocument<MongoType> convert(Document document) throws ConversionException {
+	
+	public static DatabaseDocument<MongoType> doConvert(Document document) throws ConversionException {
 		try {
 			if(contains(document, "\u0000")) {
 				throw new ConversionException("A document cannot contain the NUL character. See https://jira.mongodb.org/browse/SERVER-7691");
@@ -239,8 +238,13 @@ public class MongoConnector implements DatabaseConnector<MongoType> {
 			throw new ConversionException("JSON Exception caught while converting", e);
 		}
 	}
+
+	@Override
+	public DatabaseDocument<MongoType> convert(Document document) throws ConversionException {
+		return doConvert(document);
+	}
 	
-	private boolean contains(Document haystack, String needle) {
+	private static boolean contains(Document haystack, String needle) {
 		for(String field : haystack.getContentFields()) {
 			if(field.contains(needle)) {
 				return true;
@@ -253,7 +257,7 @@ public class MongoConnector implements DatabaseConnector<MongoType> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private boolean contains(Object object, String needle) {
+	private static boolean contains(Object object, String needle) {
 		if(object instanceof String) {
 			return ((String) object).contains(needle);
 		} else if (object instanceof List<?>) {
