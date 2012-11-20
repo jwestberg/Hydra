@@ -7,13 +7,19 @@ import com.google.inject.Singleton;
 
 public class TestModule extends AbstractModule {
 	private String namespace;
+	private DatabaseConfiguration config;
 	
 	public TestModule() {
 		this("junitspace");
 	}
 	
 	public TestModule(String namespace) {
+		this(namespace, null);
+	}
+	
+	public TestModule(String namespace, DatabaseConfiguration config) {
 		this.namespace = namespace;
+		this.config = config;
 	}
 
 	@Override
@@ -23,6 +29,9 @@ public class TestModule extends AbstractModule {
 	
 	@Provides @Singleton
 	protected DatabaseConfiguration getConfiguration() {
+		if(config!=null) {
+			return config;
+		}
 		return new DatabaseConfiguration() {
 			
 			@Override
