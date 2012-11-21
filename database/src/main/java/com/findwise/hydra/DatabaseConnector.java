@@ -16,7 +16,7 @@ public interface DatabaseConnector<T extends DatabaseType> {
 	/**
 	 * Connect to the database.
 	 */
-	abstract void connect() throws IOException;
+	void connect() throws IOException;
 
 	/**
 	 * Will block execution until the latest write has been pushed though.
